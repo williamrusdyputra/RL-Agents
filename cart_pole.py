@@ -1,7 +1,7 @@
 import gym
 from agents.reinforce import ReinforceAgent
 
-env = gym.make('CartPole-v1')
+env = gym.make('CartPole-v0')
 agent = ReinforceAgent(env)
 
 max_episode = 1000

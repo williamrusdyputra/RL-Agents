@@ -10,7 +10,7 @@ class ReinforceAgent:
         self.gradients = []
         self.observations = []
         self.rewards = []
-        self.discount = 0.99
+        self.discount = 0.95
         self.learning_rate = 1e-2
         self.network = self._build_network()
 
