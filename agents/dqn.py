@@ -15,7 +15,7 @@ class DQNAgent:
 
     def _build_network(self):
         model = tf.keras.Sequential([
-            tf.keras.layers.Conv2D(16, kernel_size=(8, 8), strides=(4, 4), activation='relu', input_shape=(84, 84, 1)),
+            tf.keras.layers.Conv2D(16, kernel_size=(8, 8), strides=(4, 4), activation='relu', input_shape=(84, 84, 4)),
             tf.keras.layers.Conv2D(32, kernel_size=(4, 4), strides=(2, 2), activation='relu'),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(units=256, activation='relu'),
@@ -32,10 +32,9 @@ class DQNAgent:
         observation = cv2.cvtColor(cv2.resize(observation, (84, 110)), cv2.COLOR_BGR2GRAY)
         observation = observation[26:110, :]
         _, observation = cv2.threshold(observation, 1, 255, cv2.THRESH_BINARY)
-        return np.reshape(observation, (1, 84, 84, 1)).astype('float32')
+        return np.reshape(observation, (84, 84)).astype('float32')
 
     def choose_action(self, observation):
-        observation = self.pre_process_observation(observation)
         prob = self.network.predict(observation).flatten()
         greedy_action = np.argmax(prob)
         random_prob = np.random.random()
