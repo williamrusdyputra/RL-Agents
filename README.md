@@ -4,3 +4,4 @@ Various of Reinforcement Learning agents implemented using Python and Tensorflow
 
 Current agents that are available:
   - REINFORCE (Monte Carlo Policy Gradient)
+  - DQN (Deep Q-Networks)
