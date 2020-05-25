@@ -28,7 +28,6 @@ for episode in range(1, max_episode):
         # (x2, x3, x4, x5) for new_observation (reference by DeepMind's Nature paper on DQN)
         if frame_count < FRAME_SKIP * 7:
             action = env.action_space.sample()
-            # DeepMind's frame skipping technique with k = 4
             if frame_count % FRAME_SKIP == 0:
                 stacked_frame.append(observation)
             frame_count += 1
