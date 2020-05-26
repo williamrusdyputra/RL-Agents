@@ -115,3 +115,5 @@ class DQNAgent:
         if self.update_iteration % 50000 == 0:
             print('===============')
             print('EPOCH: {}'.format(self.update_iteration / 50000))
+            self.network.save_weights('./weights/network')
+            self.target_network.save_weights('./weights/target_network')
