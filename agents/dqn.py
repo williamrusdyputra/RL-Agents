@@ -1,6 +1,15 @@
-import numpy as np
 import cv2
+import numpy as np
+import random
 import tensorflow as tf
+
+"""
+    You will notice that I use uint8 for observation and then convert them into float32 when using them.
+    This is necessary because RAM usage can get very large to store frames from the game and uint8
+    is the smallest datatype to store the frames.
+    Numpy asarray is also used because np.array() copy the object and making more memory use whereas 
+    np.asarray does not unless it is necessary 
+"""
 
 
 class DQNAgent:
@@ -10,8 +19,17 @@ class DQNAgent:
         self.action_space = env.action_space.n
         self.replay_memory = []
         self.discount = 0.95
-        self.epsilon = 0.1
+        self.epsilon = 1
+        self.min_epsilon = 0.1
+        self.exploration_steps = 1e6
+        self.epsilon_decay = (self.epsilon - self.min_epsilon) / self.exploration_steps
+        self.batch_size = 32
+        self.max_memory = 1e6
+        self.c_iteration = 1e4
+        self.replay_start_size = 2e4
+        self.update_iteration = 0
         self.network = self._build_network()
+        self.target_network = self._build_network()
 
     def _build_network(self):
         model = tf.keras.Sequential([
@@ -26,32 +44,74 @@ class DQNAgent:
 
     def store_data(self, observation, action, reward, new_observation, terminal):
         memory = [observation, action, reward, new_observation, terminal]
+        if len(self.replay_memory) > self.max_memory:
+            self.replay_memory.pop(0)
         self.replay_memory.append(memory)
 
     def pre_process_observation(self, observation):
         observation = cv2.cvtColor(cv2.resize(observation, (84, 110)), cv2.COLOR_BGR2GRAY)
         observation = observation[26:110, :]
-        _, observation = cv2.threshold(observation, 1, 255, cv2.THRESH_BINARY)
-        return np.reshape(observation, (84, 84)).astype('float32')
+        observation = np.reshape(observation, (84, 84)).astype('uint8')
+        return observation / 255.0
 
     def choose_action(self, observation):
+        observation = observation.astype('float32')
         prob = self.network.predict(observation).flatten()
         greedy_action = np.argmax(prob)
         random_prob = np.random.random()
         if random_prob <= self.epsilon:
-            return np.random.choice(self.action_space)
+            return self.env.action_space.sample()
         else:
             return greedy_action
 
+    def _update_epsilon(self):
+        if self.epsilon <= self.min_epsilon:
+            return
+        self.epsilon -= self.epsilon_decay
+
     def update_network(self):
-        memory = np.random.choice(self.replay_memory)
-        terminal = memory[4]
-        if terminal:
-            action_target = memory[2]
-        else:
-            action_target = memory[2] + self.discount * np.max(self.network.predict(memory[3]).flatten())
+        if len(self.replay_memory) < self.replay_start_size:
+            return
 
-        target = self.network.predict(memory[0]).flatten()
-        target[memory[1]] = action_target
+        self._update_epsilon()
 
-        self.network.train_on_batch(memory[0], target)
+        self.update_iteration += 1
+        memories = random.sample(self.replay_memory, self.batch_size)
+
+        memory_observations = []
+        memory_targets = []
+
+        for memory in memories:
+            terminal = memory[4]
+            if terminal:
+                action_target = memory[2]
+            else:
+                memory[3] = np.asarray(memory[3]).astype('float32')
+                action_target = memory[2] + self.discount * np.max(self.target_network.predict(memory[3]).flatten())
+
+            memory[0] = np.asarray(memory[0]).astype('float32')
+            target = self.target_network.predict(memory[0]).flatten()
+            encoded_target = np.zeros(self.action_space)
+            encoded_target[memory[1]] = 1
+            encoded_target -= target
+            encoded_target *= action_target
+
+            memory_observations.append(memory[0])
+            memory_targets.append(target)
+
+        memory_observations = np.asarray(memory_observations).astype('float32')
+        memory_targets = np.asarray(memory_targets).astype('float32')
+
+        # shape of memory observations is (32, 1, 84, 84, 4). We have to remove the 2nd dimension so that we get shape
+        # (32, 84, 84, 4) which we can input to the network
+        memory_observations = memory_observations[:, 0, :, :, :]
+
+        self.network.train_on_batch(memory_observations, memory_targets)
+
+        # copy weights to target network every c iteration
+        if self.update_iteration % self.c_iteration == 0:
+            self.target_network.set_weights(self.network.get_weights())
+
+        if self.update_iteration % 50000 == 0:
+            print('===============')
+            print('EPOCH: {}'.format(self.update_iteration / 50000))
