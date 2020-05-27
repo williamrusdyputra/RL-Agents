@@ -108,12 +108,13 @@ class DQNAgent:
 
         self.network.train_on_batch(memory_observations, memory_targets)
 
-        # copy weights to target network every c iteration
+        # copy weights to target network every c iteration and save the network
         if self.update_iteration % self.c_iteration == 0:
             self.target_network.set_weights(self.network.get_weights())
+            self.network.save_weights('./weights/network')
+            self.target_network.save_weights('./weights/target_network')
 
+        print('UPDATE ITERATION: {}'.format(self.update_iteration))
         if self.update_iteration % 50000 == 0:
             print('===============')
             print('EPOCH: {}'.format(self.update_iteration / 50000))
-            self.network.save_weights('./weights/network')
-            self.target_network.save_weights('./weights/target_network')
