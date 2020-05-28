@@ -9,7 +9,6 @@ max_episode = 1e7
 
 FRAME_SKIP = 4
 batch_size = 32
-total_frame_recorded = 0
 max_frame_recorded = 1e7
 
 for episode in range(1, int(max_episode)):
@@ -22,10 +21,11 @@ for episode in range(1, int(max_episode)):
     stacked_frame_action = []
     frame_count = 1
     reward_per_skipped = 0
+    total_frame_recorded = 0
     stored_action = env.action_space.sample()
 
     while not terminated and total_frame_recorded < max_frame_recorded:
-        env.render()
+        # env.render()
 
         observation = agent.pre_process_observation(observation)
         stacked_frame_action.append(observation)

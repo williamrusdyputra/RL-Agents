@@ -14,6 +14,7 @@ import tensorflow as tf
 
 class DQNAgent:
     def __init__(self, env):
+        self.path = ['./weights_dqn/network/network', './weights_dqn/target_network/target_network']
         self.env = env
         self.state_shape = env.observation_space.shape
         self.action_space = env.action_space.n
@@ -28,10 +29,10 @@ class DQNAgent:
         self.c_iteration = 1e4
         self.replay_start_size = 2e4
         self.update_iteration = 0
-        self.network = self._build_network()
-        self.target_network = self._build_network()
+        self.network = self._build_network('main')
+        self.target_network = self._build_network('target')
 
-    def _build_network(self):
+    def _build_network(self, model_type):
         model = tf.keras.Sequential([
             tf.keras.layers.Conv2D(16, kernel_size=(8, 8), strides=(4, 4), activation='relu', input_shape=(84, 84, 4)),
             tf.keras.layers.Conv2D(32, kernel_size=(4, 4), strides=(2, 2), activation='relu'),
@@ -40,6 +41,12 @@ class DQNAgent:
             tf.keras.layers.Dense(units=self.action_space)
         ])
         model.compile(optimizer='adam', loss='mse')
+
+        if model_type == 'main':
+            model.load_weights(self.path[0])
+        else:
+            model.load_weights(self.path[1])
+
         return model
 
     def store_data(self, observation, action, reward, new_observation, terminal):
@@ -111,8 +118,9 @@ class DQNAgent:
         # copy weights to target network every c iteration and save the network
         if self.update_iteration % self.c_iteration == 0:
             self.target_network.set_weights(self.network.get_weights())
-            self.network.save_weights('./weights/network')
-            self.target_network.save_weights('./weights/target_network')
+            print('Model Saved!')
+            self.network.save_weights(self.path[0])
+            self.target_network.save_weights(self.path[1])
 
         print('UPDATE ITERATION: {}'.format(self.update_iteration))
         if self.update_iteration % 50000 == 0:
