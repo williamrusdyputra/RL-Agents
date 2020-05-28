@@ -98,10 +98,7 @@ class DQNAgent:
 
             memory[0] = np.asarray(memory[0]).astype('float32')
             target = self.target_network.predict(memory[0]).flatten()
-            encoded_target = np.zeros(self.action_space)
-            encoded_target[memory[1]] = 1
-            encoded_target -= target
-            encoded_target *= action_target
+            target[memory[1]] = action_target
 
             memory_observations.append(memory[0])
             memory_targets.append(target)
