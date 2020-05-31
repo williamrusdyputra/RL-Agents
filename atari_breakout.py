@@ -2,14 +2,16 @@ import gym
 import numpy as np
 from agents.dqn import DQNAgent
 
-env = gym.make('Breakout-v0')
+env = gym.make('Breakout-v4')
 agent = DQNAgent(env)
 
 max_episode = 1e7
 
 FRAME_SKIP = 4
 batch_size = 32
-max_frame_recorded = 1e7
+
+rewards = []
+steps = 1
 
 for episode in range(1, int(max_episode)):
     observation = env.reset()
@@ -21,10 +23,9 @@ for episode in range(1, int(max_episode)):
     stacked_frame_action = []
     frame_count = 1
     reward_per_skipped = 0
-    total_frame_recorded = 0
     stored_action = env.action_space.sample()
 
-    while not terminated and total_frame_recorded < max_frame_recorded:
+    while not terminated:
         # env.render()
 
         observation = agent.pre_process_observation(observation)
@@ -56,18 +57,26 @@ for episode in range(1, int(max_episode)):
 
         new_observation, reward, terminated, _ = env.step(action)
 
-        reward = np.sign(reward)
-
         total_reward += reward
         reward_per_skipped += reward
 
         if terminated:
+            rewards.append(total_reward)
+            if len(rewards) > 100:
+                rewards.pop(0)
+            print('====================================')
+            print('EPSILON: ', agent.epsilon)
+            print('FRAMES: ', steps)
+            print('AVERAGE REWARD: {}'.format(np.mean(rewards)))
             print('EPISODE: {} FINISHED WITH REWARD: {}'.format(episode, total_reward))
+            print('====================================')
             break
 
         observation = new_observation
-        total_frame_recorded += 1
 
-        agent.update_network()
+        if steps % 4 == 0:
+            agent.update_network(steps)
+        agent.update_epsilon()
+        steps += 1
 
 env.close()

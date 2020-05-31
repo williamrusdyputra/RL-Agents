@@ -25,9 +25,9 @@ class DQNAgent:
         self.exploration_steps = 1e6
         self.epsilon_decay = (self.epsilon - self.min_epsilon) / self.exploration_steps
         self.batch_size = 32
-        self.max_memory = 1e6
+        self.max_memory = 5e5
         self.c_iteration = 1e4
-        self.replay_start_size = 2e4
+        self.replay_start_size = 1e6
         self.update_iteration = 0
         self.network = self._build_network('main')
         self.target_network = self._build_network('target')
@@ -40,7 +40,7 @@ class DQNAgent:
             tf.keras.layers.Dense(units=256, activation='relu'),
             tf.keras.layers.Dense(units=self.action_space)
         ])
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse')
 
         if model_type == 'main':
             model.load_weights(self.path[0])
@@ -71,16 +71,14 @@ class DQNAgent:
         else:
             return greedy_action
 
-    def _update_epsilon(self):
+    def update_epsilon(self):
         if self.epsilon <= self.min_epsilon:
             return
         self.epsilon -= self.epsilon_decay
 
-    def update_network(self):
-        if len(self.replay_memory) < self.replay_start_size:
+    def update_network(self, steps):
+        if steps < self.replay_start_size:
             return
-
-        self._update_epsilon()
 
         self.update_iteration += 1
         memories = random.sample(self.replay_memory, self.batch_size)
@@ -97,11 +95,11 @@ class DQNAgent:
                 action_target = memory[2] + self.discount * np.max(self.target_network.predict(memory[3]).flatten())
 
             memory[0] = np.asarray(memory[0]).astype('float32')
-            target = self.target_network.predict(memory[0]).flatten()
-            target[memory[1]] = action_target
+            encoded_target = np.zeros(self.action_space)
+            encoded_target[memory[1]] = action_target
 
             memory_observations.append(memory[0])
-            memory_targets.append(target)
+            memory_targets.append(encoded_target)
 
         memory_observations = np.asarray(memory_observations).astype('float32')
         memory_targets = np.asarray(memory_targets).astype('float32')
@@ -110,7 +108,8 @@ class DQNAgent:
         # (32, 84, 84, 4) which we can input to the network
         memory_observations = memory_observations[:, 0, :, :, :]
 
-        self.network.train_on_batch(memory_observations, memory_targets)
+        loss = self.network.train_on_batch(memory_observations, memory_targets)
+        print('LOSS: {}'.format(loss))
 
         # copy weights to target network every c iteration and save the network
         if self.update_iteration % self.c_iteration == 0:
