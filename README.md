@@ -5,5 +5,5 @@ Repository was made because without implementing RL agents by myself, it is hard
 
 Current agents that are available:
   - REINFORCE (Monte Carlo Policy Gradient) -- done, tested on cart pole with average reward 500
-  - DQN (Deep Q-Networks) --on progress to be tested on atari breakout environment
-  - A2C (Advantage Actor-Critic) --on progress to be tested on mountain car continuous environment
+  - DQN (Deep Q-Networks) -- on progress to be tested on atari breakout environment
+  - A2C (Advantage Actor-Critic) -- on progress to be tested on mountain car continuous environment
