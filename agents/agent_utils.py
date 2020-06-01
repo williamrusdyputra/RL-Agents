@@ -4,8 +4,8 @@ import tensorflow as tf
 
 def build_actor(action_space, state_shape):
     model = tf.keras.Sequential([
-        tf.keras.layers.Dense(units=256, activation='relu', input_shape=state_shape),
-        tf.keras.layers.Dense(units=512, activation='relu'),
+        tf.keras.layers.Dense(units=128, activation='tanh', input_shape=state_shape),
+        tf.keras.layers.Dense(units=256, activation='tanh'),
         tf.keras.layers.Dense(units=action_space, activation='linear')
     ])
 
@@ -15,19 +15,18 @@ def build_actor(action_space, state_shape):
         advantage = y_true[:, action_space:]
         return -np.log(y_pred.prob(action_true) + 1e-6) * advantage
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss=loss)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5), loss=loss)
 
     return model
 
 
 def build_critic(state_shape):
     model = tf.keras.Sequential([
-        tf.keras.layers.Dense(units=128, activation='relu', input_shape=state_shape),
-        tf.keras.layers.Dense(units=256, activation='relu'),
-        tf.keras.layers.Dense(units=128, activation='relu'),
+        tf.keras.layers.Dense(units=256, activation='tanh', input_shape=state_shape),
+        tf.keras.layers.Dense(units=512, activation='tanh'),
         tf.keras.layers.Dense(units=1, activation='linear')
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss='mse')
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4), loss='mse')
 
     return model
