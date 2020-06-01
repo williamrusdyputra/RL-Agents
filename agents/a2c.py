@@ -13,7 +13,8 @@ class A2CAgent:
         self.global_actor = build_actor(self.action_space, self.state_shape)
         self.global_critic = build_critic(self.state_shape)
         self.barrier = threading.Barrier(self.n_agent)
-        self.max_steps = 2e2
+        self.max_steps = 1e4
+        self.max_time = 1e3
         self.max_loop = 1e4
         self.discount = 0.95
 
@@ -30,7 +31,7 @@ class A2CAgent:
 
     def train(self, actor, critic):
         step = 1
-        while step < self.max_loop:
+        while step < self.max_steps:
             print('{} is running on step: {}'.format(threading.current_thread().name, step))
             actor.set_weights(self.global_actor.get_weights())
             critic.set_weights(self.global_critic.get_weights())
@@ -43,7 +44,7 @@ class A2CAgent:
             actions = []
             time_step = 1
 
-            while not terminated and time_step < self.max_steps:
+            while not terminated and time_step < self.max_time:
                 action = actor.predict(observation)
 
                 observation, reward, terminated, _ = self.env.step(action)
@@ -52,6 +53,7 @@ class A2CAgent:
                 rewards.append(reward)
                 actions.append(action)
                 time_step += 1
+                step += 1
 
             if terminated:
                 return_estimation = 0
@@ -85,7 +87,7 @@ class A2CAgent:
             optimizer.apply_gradients(zip(actor_gradients, self.global_actor.trainable_weights))
             optimizer = self.global_critic.optimizer
             optimizer.apply_gradients(zip(critic_gradients, self.global_critic.trainable_weights))
-            step += 1
+
             print('{} already accumulated gradient. Waiting for other thread..'.format(threading.current_thread().name))
             self.barrier.wait()
 
