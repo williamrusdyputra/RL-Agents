@@ -3,14 +3,6 @@ import numpy as np
 import random
 import tensorflow as tf
 
-"""
-    You will notice that I use uint8 for observation and then convert them into float32 when using them.
-    This is necessary because RAM usage can get very large to store frames from the game and uint8
-    is the smallest datatype to store the frames.
-    Numpy asarray is also used because np.array() copy the object and making more memory use whereas 
-    np.asarray does not unless it is necessary 
-"""
-
 
 class DQNAgent:
     def __init__(self, env):

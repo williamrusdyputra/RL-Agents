@@ -1,5 +1,5 @@
+import threading
 import tensorflow as tf
-from threading import Thread
 from .agent_utils import build_actor, build_critic
 
 
@@ -12,6 +12,7 @@ class A2CAgent:
         self.n_agent = 4
         self.global_actor = build_actor(self.action_space, self.state_shape)
         self.global_critic = build_critic(self.state_shape)
+        self.barrier = threading.Barrier(self.n_agent)
         self.max_steps = 2e2
         self.max_loop = 1e4
         self.discount = 0.95
@@ -28,11 +29,12 @@ class A2CAgent:
         return workers
 
     def train(self, actor, critic):
-        actor.set_weights(self.global_actor.get_weights())
-        critic.set_weights(self.global_critic.get_weights())
-
-        step = 0
+        step = 1
         while step < self.max_loop:
+            print('{} is running on step: {}'.format(threading.current_thread().name, step))
+            actor.set_weights(self.global_actor.get_weights())
+            critic.set_weights(self.global_critic.get_weights())
+
             observation = self.env.reset()
             terminated = False
 
@@ -64,7 +66,7 @@ class A2CAgent:
                 actor_target = tf.concat([actions[i], td_error], axis=1)
                 with tf.GradientTape() as tape:
                     actor_loss = actor.loss(actor_target, actor.predict(observations[i]))
-                    critic_loss = critic.loss(td_error, critic.predict(observations[i]))
+                    critic_loss = critic.loss(return_estimation, critic.predict(observations[i]))
 
                 # accumulate gradients w.r.t parameters
                 actor_gradient = tape.gradient(actor_loss, actor.trainable_weights)
@@ -84,6 +86,22 @@ class A2CAgent:
             optimizer = self.global_critic.optimizer
             optimizer.apply_gradients(zip(critic_gradients, self.global_critic.trainable_weights))
             step += 1
+            print('{} already accumulated gradient. Waiting for other thread..'.format(threading.current_thread().name))
+            self.barrier.wait()
 
     def assign_workers(self):
         workers = self.create_workers()
+        threads = []
+        for idx, worker in enumerate(workers):
+            thread = threading.Thread(target=self.train, args=(worker[0], worker[1]), name='Worker {}'.format(idx+1))
+            threads.append(thread)
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+    def start_train(self):
+        self.assign_workers()
+        print('FINISHED TRAINING')
