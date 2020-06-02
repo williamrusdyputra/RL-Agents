@@ -18,7 +18,7 @@ class A2CAgent:
         self.global_actor = self.build_network('actor')
         self.global_critic = self.build_network('critic')
         self.barrier = threading.Barrier(self.n_agent)
-        self.max_time = 1e2
+        self.max_time = 5e2
         self.discount = 0.95
         self.state_space_samples = np.array([env.observation_space.sample() for _ in range(10000)])
         self.scaler = preprocessing.StandardScaler()
@@ -41,6 +41,7 @@ class A2CAgent:
             return model
 
     def choose_action(self, observation):
+        observation = self.scale_state(observation.reshape(-1, 2))
         return self.global_actor.predict(observation)
 
     def create_workers(self):

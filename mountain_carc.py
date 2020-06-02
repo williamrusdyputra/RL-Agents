@@ -13,11 +13,8 @@ total_reward = 0
 
 while not terminated:
     env.render()
-    observation = agent.scale_state(observation.reshape(-1, 2))
     action = agent.choose_action(observation)
-
     observation, reward, terminated, _ = env.step(action)
-
     total_reward += reward
 
     if terminated:

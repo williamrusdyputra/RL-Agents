@@ -15,7 +15,7 @@ def build_actor(action_space, state_shape):
         advantage = y_true[:, action_space:]
         return -np.log(y_pred.prob(action_true) + 1e-6) * advantage
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5), loss=loss)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4), loss=loss)
 
     return model
 
@@ -27,6 +27,6 @@ def build_critic(state_shape):
         tf.keras.layers.Dense(units=1, activation='linear')
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4), loss='mse')
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse')
 
     return model
