@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from sklearn import preprocessing
-from .agent_utils import build_actor, build_critic
+from .agent_utils import build_network
 
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -20,33 +20,15 @@ class A2CAgent:
         self.env = env
         self.state_shape = env.observation_space.shape
         self.action_space = env.action_space.shape[0]
-        self.global_actor = self.build_network('actor')
-        self.global_critic = self.build_network('critic')
-        self.target_critic = self.build_network('critic')
+        self.global_actor = build_network('actor', self.action_space, self.state_shape, self.path[0])
+        self.global_critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
+        self.target_critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
         self.max_episode = 40
         self.max_time = 1e3
         self.discount = 0.95
         self.state_space_samples = np.array([env.observation_space.sample() for _ in range(10000)])
         self.scaler = preprocessing.StandardScaler()
         self.scaler.fit(self.state_space_samples)
-
-    def build_network(self, mode):
-        if mode == 'actor':
-            model = build_actor(self.action_space, self.state_shape)
-            try:
-                model.load_weights(self.path[0])
-                print('Model loaded')
-            except ValueError:
-                print('Model initialized')
-            return model
-        elif mode == 'critic':
-            model = build_critic(self.state_shape)
-            try:
-                model.load_weights(self.path[1])
-                print('Model loaded')
-            except ValueError:
-                print('Model initialized')
-            return model
 
     def choose_action(self, observation):
         observation = self.scale_state(observation.reshape(-1, 2))
