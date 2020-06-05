@@ -18,8 +18,13 @@ class PPOAgent:
         self.horizon = 256
         self.batch_size = 32
         self.epochs = 10
+        self.terminal_step = -1
         self.rewards = deque(maxlen=self.horizon)
         self.observations = deque(maxlen=self.horizon)
+
+    def store_data(self, observation, reward):
+        self.observations.append(observation)
+        self.rewards.append(reward)
 
     def choose_action(self, observation):
         return self.actor.predict(observation)
@@ -36,13 +41,13 @@ class PPOAgent:
         entropy = -tf.reduce_sum(actor_prob * tf.math.log(actor_prob))
         return critic_loss - actor_loss - entropy
 
-    def update_network(self, terminal_step):
+    def update_network(self):
         general_advantage_estimations = deque()
         return_estimations = deque()
         time = 0
 
         for reward in self.rewards[::-1]:
-            if time+1 == terminal_step:
+            if time+1 == self.terminal_step:
                 return_estimation = reward
                 delta = reward - self.critic.predict(self.observations[time])
             else:
