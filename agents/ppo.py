@@ -10,14 +10,14 @@ class PPOAgent:
         self.state_shape = env.observation_space.shape
         self.action_space = env.action_space.n
         self.actor = build_network('actor', self.action_space, self.state_shape, self.path[0])
-        self.critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
         self.old_actor = build_network('actor', self.action_space, self.state_shape, self.path[0])
+        self.critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
+        self.target_critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
         self.discount = 0.97
         self.s_lambda = 0.95
         self.epsilon = 0.2
         self.horizon = 256
         self.batch_size = 32
-        self.epochs = 10
         self.terminal_step = -1
         self.rewards = deque(maxlen=self.horizon)
         self.observations = deque(maxlen=self.horizon)
@@ -49,10 +49,10 @@ class PPOAgent:
         for reward in self.rewards[::-1]:
             if time+1 == self.terminal_step:
                 return_estimation = reward
-                delta = reward - self.critic.predict(self.observations[time])
+                delta = reward - self.target_critic.predict(self.observations[time])
             else:
-                return_estimation = reward + self.discount * self.critic.predict(self.observations[time+1])
-                delta = return_estimation - self.critic.predict(self.observations[time])
+                return_estimation = reward + self.discount * self.target_critic.predict(self.observations[time+1])
+                delta = return_estimation - self.target_critic.predict(self.observations[time])
             gae = delta + self.discount * self.s_lambda * general_advantage_estimations[time+1]
             general_advantage_estimations.append(gae)
             return_estimations.append(return_estimation)
@@ -61,7 +61,6 @@ class PPOAgent:
         return_estimations.reverse()
         general_advantage_estimations.reverse()
 
-        # update the actor
         index = 0
         step = self.horizon // self.batch_size
         for i in range(step-1):
@@ -79,9 +78,16 @@ class PPOAgent:
 
                 index += 1
 
+            # update the actor
             optimizer = self.actor.optimizer
             optimizer.apply_gradients(zip(actor_gradients, self.actor.trainable_weights))
 
             # update the critic
             self.critic.train_on_batch(self.observations[index-self.batch_size:index],
                                        return_estimations[index-self.batch_size:index])
+        
+        # target critic used for handling moving target problem in RL
+        self.target_critic.set_weights(self.critic.get_weights())
+
+        self.actor.save_weights(self.path[0])
+        self.critic.save_weights(self.path[1])
