@@ -27,7 +27,7 @@ def build_actor(action_space, state_shape):
         tf.keras.layers.Dense(units=action_space, activation='linear')
     ])
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=3e-4))
 
     return model
 

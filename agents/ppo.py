@@ -85,7 +85,7 @@ class PPOAgent:
             # update the critic
             self.critic.train_on_batch(self.observations[index-self.batch_size:index],
                                        return_estimations[index-self.batch_size:index])
-        
+
         # target critic used for handling moving target problem in RL
         self.target_critic.set_weights(self.critic.get_weights())
 
