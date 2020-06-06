@@ -56,14 +56,14 @@ class Memory:
         self.states = []
         self.log_probs = []
         self.rewards = []
-        self.is_terminals = []
+        self.terminals = []
 
     def clear_memory(self):
         del self.actions[:]
         del self.states[:]
         del self.log_probs[:]
         del self.rewards[:]
-        del self.is_terminals[:]
+        del self.terminals[:]
 
 
 class ActorCritic(nn.Module):

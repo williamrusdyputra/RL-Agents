@@ -30,7 +30,7 @@ for i in range(1, int(max_episode)):
         time_step += 1
 
         memory.rewards.append(reward)
-        memory.is_terminals.append(terminated)
+        memory.terminals.append(terminated)
 
         if time_step % UPDATE_STEP == 0:
             agent.update(memory)
