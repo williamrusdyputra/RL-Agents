@@ -9,5 +9,5 @@ Current agents that are available:
   - **DQN (Deep Q-Networks)** [*on progress*]
   - **PPO (Proximal Policy Optimization)** [*on progress*] using PyTorch
   
-I used both Tensorflow and PyTorch because it is hard to make custom changes to Tensorflow Keras API and thus I use PyTorch.
+I used both Tensorflow and PyTorch because it is hard to make custom changes to Tensorflow Keras API and thus I use PyTorch too.
 I am shifting from Tensorflow to PyTorch after implementing PPO because PyTorch is better IMO to make custom changes.
