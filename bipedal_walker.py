@@ -1,35 +1,46 @@
 import gym
+import torch
 from agents.ppo import PPOAgent
+from agents.agent_utils import Memory
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+max_episode = 1e3
+max_steps = 1e3
+
+UPDATE_STEP = 2e3
 
 env = gym.make("BipedalWalker-v3")
+
+memory = Memory()
 agent = PPOAgent(env)
 
-max_episode = int(1e4)
+total_reward = 0
+time_step = 0
 
-for episode in range(1, max_episode):
+for i in range(1, int(max_episode)):
     observation = env.reset()
-
-    terminated = False
-    time_steps = 1
-    total_reward = 0
-
-    while not terminated:
+    for _ in range(int(max_steps)):
         env.render()
-        observation = observation.reshape(-1, env.observation_space.shape[0])
-        action = agent.choose_action(observation)
-        new_observation, reward, terminated, _ = env.step(action)
 
+        action = agent.choose_action(observation, memory)
+        observation, reward, terminated, _ = env.step(action)
+
+        time_step += 1
+
+        memory.rewards.append(reward)
+        memory.is_terminals.append(terminated)
+
+        if time_step % UPDATE_STEP == 0:
+            agent.update(memory)
+            memory.clear_memory()
+            time_step = 0
+            print('AGENT UPDATED')
         total_reward += reward
-        agent.store_data(observation, reward)
-
         if terminated:
-            print('EPISODE: {} FINISHED AFTER: {} time steps WITH REWARD: {}'.format(episode, time_steps, total_reward))
+            print('EPISODE {} COMPLETED WITH REWARD: {}'.format(i, total_reward))
+            total_reward = 0
             break
 
-        observation = new_observation
-        time_steps += 1
-
-    agent.update_network(time_steps)
-    agent.reset_data()
-
-env.close()
+    if i % 200 == 0:
+        torch.save(agent.policy.state_dict(), './weights_ppo.pth')
