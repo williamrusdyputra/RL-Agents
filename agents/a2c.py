@@ -20,9 +20,9 @@ class A2CAgent:
         self.env = env
         self.state_shape = env.observation_space.shape
         self.action_space = env.action_space.shape[0]
-        self.global_actor = build_network('actor', self.action_space, self.state_shape, self.path[0])
-        self.global_critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
-        self.target_critic = build_network('critic', self.action_space, self.state_shape, self.path[1])
+        self.global_actor = build_network('actor', self.action_space, self.state_shape, self.path[0], 'linear')
+        self.global_critic = build_network('critic', self.action_space, self.state_shape, self.path[1], 'linear')
+        self.target_critic = build_network('critic', self.action_space, self.state_shape, self.path[1], 'linear')
         self.max_episode = 40
         self.max_time = 1e3
         self.discount = 0.95

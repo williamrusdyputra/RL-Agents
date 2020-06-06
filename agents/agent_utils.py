@@ -1,9 +1,9 @@
 import tensorflow as tf
 
 
-def build_network(mode, action_space, state_shape, path):
+def build_network(mode, action_space, state_shape, path, output_activation):
     if mode == 'actor':
-        model = build_actor(action_space, state_shape)
+        model = build_actor(action_space, state_shape, output_activation)
         try:
             model.load_weights(path)
             print('Model loaded')
@@ -20,11 +20,11 @@ def build_network(mode, action_space, state_shape, path):
         return model
 
 
-def build_actor(action_space, state_shape):
+def build_actor(action_space, state_shape, activation):
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(units=32, activation='tanh', input_shape=state_shape),
         tf.keras.layers.Dense(units=64, activation='tanh'),
-        tf.keras.layers.Dense(units=action_space, activation='linear')
+        tf.keras.layers.Dense(units=action_space, activation=activation)
     ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=3e-4))

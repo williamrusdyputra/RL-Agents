@@ -1,10 +1,10 @@
 import gym
 from agents.ppo import PPOAgent
 
-env = gym.make("Hopper-v2")
+env = gym.make("BipedalWalker-v3")
 agent = PPOAgent(env)
 
-max_episode = int(1e6)
+max_episode = int(1e4)
 
 for episode in range(1, max_episode):
     observation = env.reset()
@@ -14,7 +14,8 @@ for episode in range(1, max_episode):
     total_reward = 0
 
     while not terminated:
-        # env.render()
+        env.render()
+        observation = observation.reshape(-1, env.observation_space.shape[0])
         action = agent.choose_action(observation)
         new_observation, reward, terminated, _ = env.step(action)
 
@@ -28,6 +29,7 @@ for episode in range(1, max_episode):
         observation = new_observation
         time_steps += 1
 
-    agent.update_network()
+    agent.update_network(time_steps)
+    agent.reset_data()
 
 env.close()

@@ -15,7 +15,7 @@ class DQNAgent:
         self.action_space = env.action_space.n
         self.replay_memory = []
         self.discount = 0.95
-        self.epsilon = 1
+        self.epsilon = 0.1
         self.min_epsilon = 0.1
         self.exploration_steps = 1e6
         self.epsilon_decay = (self.epsilon - self.min_epsilon) / self.exploration_steps
