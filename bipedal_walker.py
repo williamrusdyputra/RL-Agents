@@ -20,6 +20,7 @@ time_step = 0
 
 for i in range(1, int(max_episode)):
     observation = env.reset()
+    total_reward = 0
     for _ in range(int(max_steps)):
         env.render()
 
@@ -38,9 +39,9 @@ for i in range(1, int(max_episode)):
             print('AGENT UPDATED')
         total_reward += reward
         if terminated:
-            print('EPISODE {} COMPLETED WITH REWARD: {}'.format(i, total_reward))
-            total_reward = 0
             break
+
+    print('EPISODE {} COMPLETED WITH REWARD: {}'.format(i, total_reward))
 
     if i % 200 == 0:
         torch.save(agent.policy.state_dict(), './weights_ppo.pth')
