@@ -44,4 +44,4 @@ for i in range(1, int(max_episode)):
     print('EPISODE {} COMPLETED WITH REWARD: {}'.format(i, total_reward))
 
     if i % 200 == 0:
-        torch.save(agent.policy.state_dict(), './weights_ppo.pth')
+        torch.save(agent.policy.state_dict(), agent.path)
