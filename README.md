@@ -6,7 +6,7 @@ Repository was made because without implementing RL agents by myself, it is hard
 Current agents that are available:
   - **REINFORCE (Monte Carlo Policy Gradient)** [*done, cart-pole with average reward 500*]
   - **A2C (Advantage Actor-Critic)** [*done, mountain car continuous with average reward 96*]
-  - **DQN (Deep Q-Networks)** [*on progress, training on atari*]
+  - **DQN (Deep Q-Networks)** [*on progress*]
   - **PPO (Proximal Policy Optimization)** [*on progress*]
   
 These implementations only for each specific environment, I did not make these algorithms to be on abstract level to test on all environment
