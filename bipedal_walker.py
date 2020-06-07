@@ -34,7 +34,7 @@ for i in range(1, int(max_episode)):
 
         if time_step % UPDATE_STEP == 0:
             agent.update(memory)
-            memory.clear_memory()
+            memory.reset()
             time_step = 0
             print('AGENT UPDATED')
         total_reward += reward

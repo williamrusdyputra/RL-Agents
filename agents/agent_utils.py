@@ -53,17 +53,17 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Memory:
     def __init__(self):
         self.actions = []
-        self.states = []
+        self.observations = []
         self.log_probs = []
         self.rewards = []
         self.terminals = []
 
-    def clear_memory(self):
-        del self.actions[:]
-        del self.states[:]
-        del self.log_probs[:]
-        del self.rewards[:]
-        del self.terminals[:]
+    def reset(self):
+        self.actions = []
+        self.observations = []
+        self.log_probs = []
+        self.rewards = []
+        self.terminals = []
 
 
 class ActorCritic(nn.Module):

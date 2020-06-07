@@ -33,13 +33,13 @@ class PPOAgent:
 
     def choose_action(self, state, memory):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
-        return self.old_policy.choose_action(state, memory).cpu().data.numpy().flatten()
+        return self.old_policy.choose_action(state, memory).data.numpy().flatten()
 
     def update(self, memory):
         rewards = []
         discounted_reward = 0
-        for reward, is_terminal in zip(reversed(memory.rewards), reversed(memory.is_terminals)):
-            if is_terminal:
+        for reward, terminated in zip(reversed(memory.rewards), reversed(memory.terminals)):
+            if terminated:
                 discounted_reward = 0
             discounted_reward = reward + (self.discount * discounted_reward)
             rewards.insert(0, discounted_reward)
@@ -48,7 +48,7 @@ class PPOAgent:
         rewards = torch.tensor(rewards).to(device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
 
-        old_states = torch.squeeze(torch.stack(memory.states).to(device), 1).detach()
+        old_states = torch.squeeze(torch.stack(memory.observations).to(device), 1).detach()
         old_actions = torch.squeeze(torch.stack(memory.actions).to(device), 1).detach()
         old_log_probs = torch.squeeze(torch.stack(memory.log_probs), 1).to(device).detach()
 
