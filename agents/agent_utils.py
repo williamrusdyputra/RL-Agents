@@ -94,7 +94,7 @@ class ActorCritic(nn.Module):
         action = dist.sample()
         action_log_prob = dist.log_prob(action)
 
-        memory.states.append(state)
+        memory.observations.append(state)
         memory.actions.append(action)
         memory.log_probs.append(action_log_prob)
 

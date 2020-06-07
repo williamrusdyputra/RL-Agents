@@ -33,7 +33,7 @@ class PPOAgent:
 
     def choose_action(self, state, memory):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
-        return self.old_policy.choose_action(state, memory).data.numpy().flatten()
+        return self.old_policy.choose_action(state, memory).cpu().data.numpy().flatten()
 
     def update(self, memory):
         rewards = []
