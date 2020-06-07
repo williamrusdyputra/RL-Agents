@@ -23,11 +23,11 @@ class PPOAgent:
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self.learning_rate)
 
         self.old_policy = ActorCritic(self.observation_space, self.action_space, self.std).to(device)
-        self.old_policy.load_observation_dict(self.policy.observation_dict())
+        self.old_policy.load_state_dict(self.policy.state_dict())
 
     def load_policy(self):
         try:
-            self.policy.load_observation_dict(torch.load(self.path))
+            self.policy.load_state_dict(torch.load(self.path))
         except FileNotFoundError:
             print('Initialized Model')
 
