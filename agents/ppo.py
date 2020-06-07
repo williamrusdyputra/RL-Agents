@@ -65,4 +65,4 @@ class PPOAgent:
             loss.mean().backward()
             self.optimizer.step()
 
-        self.old_policy.load_observation_dict(self.policy.state_dict())
+        self.old_policy.load_state_dict(self.policy.state_dict())
