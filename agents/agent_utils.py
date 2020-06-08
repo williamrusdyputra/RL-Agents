@@ -71,11 +71,11 @@ class ActorCritic(nn.Module):
         super(ActorCritic, self).__init__()
         self.agent_action = torch.full((action_space,), action_std * action_std).to(device)
         self.actor = nn.Sequential(
-            nn.Linear(observation_space, 128),
+            nn.Linear(observation_space, 40),
             nn.Tanh(),
-            nn.Linear(128, 64),
+            nn.Linear(40, 40),
             nn.Tanh(),
-            nn.Linear(64, action_space),
+            nn.Linear(40, action_space),
             nn.Tanh()
         )
         self.critic = nn.Sequential(

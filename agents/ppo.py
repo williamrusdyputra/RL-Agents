@@ -12,8 +12,8 @@ class PPOAgent:
         self.learning_rate = 3e-4
         self.discount = 0.99
         self.clip = 0.2
-        self.epochs = 100
-        self.std = 0.4
+        self.epochs = 50
+        self.std = 0.5
         self.observation_space = env.observation_space.shape[0]
         self.action_space = env.action_space.shape[0]
         self.MseLoss = nn.MSELoss()

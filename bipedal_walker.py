@@ -5,10 +5,10 @@ from agents.agent_utils import Memory
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-max_episode = 1e3
+max_episode = 1e4
 max_steps = 1e3
 
-UPDATE_STEP = 2e3
+UPDATE_STEP = 1e3
 
 env = gym.make("BipedalWalker-v3")
 
@@ -43,5 +43,5 @@ for i in range(1, int(max_episode)):
 
     print('EPISODE {} COMPLETED WITH REWARD: {}'.format(i, total_reward))
 
-    if i % 200 == 0:
+    if i % 100 == 0:
         torch.save(agent.policy.state_dict(), agent.path)
