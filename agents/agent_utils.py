@@ -71,19 +71,19 @@ class ActorCritic(nn.Module):
         super(ActorCritic, self).__init__()
         self.agent_action = torch.full((action_space,), action_std * action_std).to(device)
         self.actor = nn.Sequential(
-            nn.Linear(observation_space, 40),
-            nn.Tanh(),
-            nn.Linear(40, 40),
-            nn.Tanh(),
-            nn.Linear(40, action_space),
+            nn.Linear(observation_space, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, action_space),
             nn.Tanh()
         )
         self.critic = nn.Sequential(
-            nn.Linear(observation_space, 64),
-            nn.Tanh(),
-            nn.Linear(64, 32),
-            nn.Tanh(),
-            nn.Linear(32, 1)
+            nn.Linear(observation_space, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 1)
         )
 
     def choose_action(self, observation, memory):
