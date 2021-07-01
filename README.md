@@ -8,5 +8,5 @@ Current agents that are available:
   - **A2C (Advantage Actor-Critic)** [*done, mountain car continuous*] using Tensorflow
   - **PPO (Proximal Policy Optimization)** [*done, bipedal walker*] using PyTorch
  
-Experiments using Tensorflow and Pytorch framework to test RL-agents and to see if Tensorflow or Pytorch is easier for me to use.
+Experiments using Tensorflow and Pytorch framework to test RL-agents and to see if Tensorflow or Pytorch is easier for me to use. <br>
 Current state (opinion) : Pytorch is easier for complex model, Tensorflow is easier for simple model
