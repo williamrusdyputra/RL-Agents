@@ -7,5 +7,6 @@ Current agents that are available:
   - **REINFORCE (Monte Carlo Policy Gradient)** [*done, cart-pole*] using Tensorflow
   - **A2C (Advantage Actor-Critic)** [*done, mountain car continuous*] using Tensorflow
   - **PPO (Proximal Policy Optimization)** [*done, bipedal walker*] using PyTorch
-  
-I used both Tensorflow and PyTorch because it is hard to make custom changes to Tensorflow Keras API and thus I use PyTorch too.
+ 
+Experiments using Tensorflow and Pytorch framework to test RL-agents and to see if Tensorflow or Pytorch is easier for me to use.
+Current state (opinion) : Pytorch is easier for complex model, Tensorflow is easier for simple model
